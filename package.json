@@ -1,0 +1,19 @@
+{
+  "name": "am-localization",
+  "private": true,
+  "scripts": {
+    "start": "grunt",
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt": "0.4.1",
+    "grunt-karma": "0.4.3",
+    "grunt-contrib-watch": "0.3.1",
+    "grunt-contrib-jshint": "0.4.3",
+    "grunt-contrib-requirejs": "0.4.0",
+    "grunt-contrib-clean": "0.4.1",
+    "grunt-shell": "~0.2.2",
+    "grunt-contrib-compass": "~0.2.0",
+    "i18n-abide": "0.0.14"
+  }
+}

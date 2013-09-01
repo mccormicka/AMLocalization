@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<head>
+    <link rel="stylesheet" href="../dist/styles/main.css">
+</head>
+<html>
+<body ng-controller="demoCtrl">
+
+<!-- DEMO COMPONENT GOES HERE -->
+<label ng-bind="englishText"></label>
+<br/>
+<label ng-bind="englishTextPlural"></label>
+<br/>
+<label ng-bind="japaneseText"></label>
+<br/>
+<label ng-bind="unknownText"></label>
+
+<script src="../components/angular/angular.min.js"></script>
+<script src="../require.config.js"></script>
+<script data-main="demo/demo.js" src="../components/requirejs/require.js"></script>
+
+</body>
+</html>

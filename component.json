@@ -1,0 +1,16 @@
+{
+    "name": "am-localization",
+    "version": "0.0.1",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/mccormicka/AMLocalization.git"
+    },
+    "dependencies": {
+        "requirejs": "~2.1.8",
+        "text": "~2.0.10",
+        "angular": "~1.2.0rc1"
+    },
+    "devDependencies": {
+        "angular-mocks": "~1.2.0rc1"
+    }
+}
