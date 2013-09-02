@@ -1013,28 +1013,41 @@ define('scripts/Service',['require','jed'],function (require) {
 
     var Jed = require('jed');
 
-    function Service($http, $q) {
+    function Service($http, $q, $rootScope) {
 
         var languages = {};
 
-        function remoteTranslation(key, lang, endpoint) {
+        function createDefer() {
             var defer = $q.defer();
             var promise = defer.promise;
-            var plural;
-            var pluralValues;
             promise.ifPlural = function () {
-                plural = true;
-                pluralValues = [].slice.call(arguments);
+                this.plural = true;
+                this.pluralValues = [].slice.call(arguments);
                 return promise;
             };
 
-            var fetched;
-            var fetchedValues;
             promise.fetch = function () {
-                fetched = true;
-                fetchedValues = [].slice.call(arguments);
+                this.fetched = true;
+                this.fetchedValues = [].slice.call(arguments);
                 return promise;
             };
+            return defer;
+        }
+
+        function resolveDefer(key, lang, defer) {
+            var translation = translatedKey(key, lang);
+            if (defer.promise.plural) {
+                translation = translation.ifPlural.apply(translation, defer.promise.pluralValues);
+            }
+            if (defer.promise.fetched) {
+                translation = translation.fetch(defer.promise.fetchedValues);
+            }
+            defer.resolve(translation);
+        }
+
+        function remoteTranslation(key, lang, endpoint) {
+
+            var defer = createDefer();
 
             var params = {
                 method: 'GET',
@@ -1052,20 +1065,13 @@ define('scripts/Service',['require','jed'],function (require) {
                     languages[lang] = new Jed({
                         'locale_data': data
                     });
-                    var translation = translatedKey(key, lang);
-                    if (plural) {
-                        translation = translation.ifPlural.apply(translation, pluralValues);
-                    }
-                    if (fetched) {
-                        translation = translation.fetch(fetchedValues);
-                    }
-                    defer.resolve(translation);
+                    resolveDefer(key, lang, defer);
                 })
                 .error(function (data) {
                     console.log('Error', data);
                 });
 
-            return promise;
+            return defer.promise;
         }
 
         function translatedKey(key, lang) {
@@ -1083,12 +1089,18 @@ define('scripts/Service',['require','jed'],function (require) {
                 if (!languages[lang]) {
                     return remoteTranslation(key, lang, this.endpoint);
                 }
-                return translatedKey(key, lang);
+                //Create our fake defer and resolve on the next tick.
+                var defer = createDefer();
+                $rootScope.$evalAsync(function(){
+                    resolveDefer(key, lang, defer);
+                });
+
+                return defer.promise;
             }
         };
     }
 
-    Service.$inject = ['$http', '$q'];
+    Service.$inject = ['$http', '$q', '$rootScope'];
     return Service;
 });
 
