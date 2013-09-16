@@ -2,10 +2,12 @@ define(function (require) {
     'use strict';
 
     var Jed = require('jed');
+    var _ = require('lodash');
 
     function Service($http, $q, $rootScope) {
 
         var languages = {};
+        var loadingLanguages = {};
 
         function createDefer() {
             var defer = $q.defer();
@@ -49,17 +51,25 @@ define(function (require) {
             if (lang !== '__default__') {
                 params.headers = {'accept-language': lang};
             }
-
-            $http(params)
-                .success(function (data) {
-                    languages[lang] = new Jed({
-                        'locale_data': data
+            if(!loadingLanguages[lang]){
+                loadingLanguages[lang] = [];
+                $http(params)
+                    .success(function (data) {
+                        languages[lang] = new Jed({
+                            'locale_data': data
+                        });
+                        resolveDefer(key, lang, defer);
+                        _.each(loadingLanguages[lang], function(item){
+                            resolveDefer(item.key, item.lang, item.defer);
+                        });
+                        delete loadingLanguages[lang];
+                    })
+                    .error(function (data) {
+                        console.log('Error', data);
                     });
-                    resolveDefer(key, lang, defer);
-                })
-                .error(function (data) {
-                    console.log('Error', data);
-                });
+            }else{
+                loadingLanguages[lang].push({key:key, lang:lang, defer:defer});
+            }
 
             return defer.promise;
         }
